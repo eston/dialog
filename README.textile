@@ -1,5 +1,28 @@
 h1. dialog
 
-Dialog is a _very simple_ jQuery-based plugin for creating, well, dialogs that I wrote for use at isocket:http://isocket.com/. There's no CSS, but the jQuery plugin itself is free for use under the MIT license (which jQuery also uses.)
+Dialog is a _very simple_ jQuery-based plugin for creating, well, dialogs that I wrote for use at isocket:http://isocket.com/. There's no CSS, but the jQuery plugin itself is free for use under the MIT license (which jQuery also uses.) Feel free to use it in your projects, as a gift from this startup to yours.
 
 h2. Usage
+Right now, you can only attach dialogs to the click event of some link somewhere &mdash; this will definitely change moving forward, but will remain the default behaviour for reverse compatibility. To use *dialog*, simply find your link element (or whatever else) that you want the dialog to pop up for. For example, let's say we have code like this that we want to spawn the dialog:
+
+@<a href="http://fallbackurl.com/" id="info-dialog">Help</a>@
+
+To wrap a dialog around this with a simple OK button, you don't have to do much:
+
+@$('#info-dialog').dialog({ title: 'Dialog Title', body: 'This is some text I want to put in the dialog' });@
+
+*dialog* will do the rest.
+
+h3. Custom buttons and button callbacks
+
+The common _OK_ button state will simply close the window. If you wish to make custom callback functions or process data, you may create your own button objects and pass them along in the _buttons_ parameter. *dialog* will accept an array of objects and parse them into multiple buttons. The _button_ object type allows for three properties: _caption_, _class_ and _callback_. For example, a button captioned _LOL_ with class _lmao_ and a callback which fires the alert _lmfao_ would be added to the dialog parameters as follows:
+
+@$('#info-dialog').dialog({ title: 'Dialog Title', body: 'some text', buttons: '{caption: 'LOL', class: 'lmao', callback: function() { alert('lmfao'); }});@
+
+Note that a _buttons_ array with a length of 1 will be parsed equivalently.
+
+For custom callbacks, @$.fn.dialog.show()@ and @$.fn.dialog.hide()@ are also exposed to show or hide the dialog as needed.
+
+h2. Support
+
+Note that *dialog* is not officially supported by me or isocket — use it at your own risk. Upstream patches may be submitted to me at eston@socialuxe.com.

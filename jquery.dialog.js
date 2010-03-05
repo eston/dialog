@@ -41,68 +41,47 @@
         establishContainer();
       }
       if ($dialogContainer.hasClass('displayed')) {
-        hideDialog(options.fadeInterval);
+        $.fn.dialog.hide(options.fadeInterval);
       }
       generateWindow(options.title, options.body, options.buttons);
-      showDialog(options.fadeInterval);
+      $.fn.dialog.show(options.fadeInterval);
+      return false; // prevent default behaviour
     });
   };
   
   $.fn.dialog.defaults = {
     title: 'Dialog Title',
     body: 'test',
-    buttons: [{class: 'submit', caption: 'OK'}],
+    buttons: {class: 'ok', caption: 'OK'},
     fadeInterval: 600
-  };
-  
-  $.fn.dialog.buttonType = {
-    OK: [{ 
-          class: 'submit',
-          caption: 'OK' 
-        }],
-        
-    OK_CANCEL: [{
-                  class: 'submit',
-                  caption: 'OK'
-                },
-                {
-                  class: 'cancel',
-                  caption: 'Cancel'
-                }], 
-                
-    YES_NO: [{
-                class: 'submit',
-                caption: 'YES'
-              },
-              {
-                class: 'cancel',
-                caption: 'NO'
-              }]
   };
   
   var $dialogContainer = null;
   
-  function attachDefaultClickEvent($button, class) {
-    switch (class) {
-      case 'submit':
-        $button.click(submitAndHideDialog);
-        break;
-      
-      case 'cancel':
-      default:
-        $button.click(hideDialog);
-        break;
+  
+  $.fn.dialog.hide = function(interval) {
+    if ($dialogContainer && $dialogContainer.hasClass('displayed')) {
+      $dialogContainer.fadeOut(interval);
+      $dialogContainer.removeClass('displayed');
     }
+  };
+  
+  $.fn.dialog.show = function(interval) {
+    if ($dialogContainer) {
+      $dialogContainer.fadeIn(interval);
+      $dialogContainer.addClass('displayed');
+    }
+  };
+
+  
+  function attachDefaultClickEvent($button, class) {
+    $button.click($.fn.dialog.hide);
   };
   
   function attachCustomClickEvent($button, class, callback) {
     var callbackFunc = callback;
     $button.click(function() {
       callbackFunc();
-      // quick shortcut
-      if (class == 'nohide') {
-        hideDialog();
-      }
     })
   }
   
@@ -110,29 +89,31 @@
     $dialogContainer = $('<div id="is-jq-dialog"></div>');
     $('body').append($dialogContainer);
   };
-  
-  function submitAndHideDialog() {
-    if ($('#js-iq-dialog form').length) {
-      $('#js-iq-dialog form').each(function() {
-        $(this).submit();
-      });
+
+  function generateButton(buttonObject) {
+    var class, caption, callback = '';
+    if (typeof(buttonObject.class) != 'undefined') {
+      class = buttonObject.class;
     }
-    hideDialog();
-  };
-  
-  function hideDialog(interval) {
-    if ($dialogContainer && $dialogContainer.hasClass('displayed')) {
-      $dialogContainer.fadeOut(interval);
-      $dialogContainer.removeClass('displayed');
+    if (typeof(buttonObject.caption) != 'undefined') {
+      caption = buttonObject.caption;
     }
-  };
-  
-  function showDialog(interval) {
-    if ($dialogContainer) {
-      $dialogContainer.fadeIn(interval);
-      $dialogContainer.addClass('displayed');
-    }
-  };
+
+    var button_html = $('<a href="javascript:void(0);"'
+                    + 'class="' + class + '">'
+                    + caption
+                    + '</a>');
+    $button = $(button_html);
+    
+    // do we have a custom callback?
+    if (typeof (buttonObject.callback) == 'function') {
+      // attach the event
+      attachCustomClickEvent($button, buttonObject.class, buttonObject.callback);
+    } else {
+      attachDefaultClickEvent($button, buttonObject.class);
+    }  
+    $("#is-jq-dialog-buttons").append($button);
+  }
   
   function generateWindow(title, html, buttons) {
     var html = '<div id="is-jq-dialog-inner">'
@@ -146,22 +127,15 @@
       $dialogContainer.html('');
     }
     $dialogContainer.append($dialogContent);
-             
-    for (var i=0; i < buttons.length; i++) {
-      var button_html = $('<a href="javascript:void(0);"'
-                      + 'class="' + buttons[i].class + '">'
-                      + buttons[i].caption
-                      + '</a>');
-      $button = $(button_html);
-      
-      // do we have a custom callback?
-      if (typeof (buttons[i].callback) == 'function') {
-        // attach the event
-        attachCustomClickEvent($button, buttons[i].class, buttons[i].callback);
-      } else {
-        attachDefaultClickEvent($button, buttons[i].class);
-      }  
-      $("#is-jq-dialog-buttons").append($button);
+
+    // there is probably a better array check
+    if (typeof(buttons.length) != 'number') {
+      generateButton(buttons);
+    } else if (buttons.length) {
+      for (var i=0; i < buttons.length; i++) {
+        console.log(buttons[i]);
+        generateButton(buttons[i]);
+      }
     }
   };
   
