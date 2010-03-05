@@ -3,6 +3,7 @@ h1. dialog
 Dialog is a _very simple_ jQuery-based plugin for creating, well, dialogs that I wrote for use at isocket:http://isocket.com/. There's no CSS, but the jQuery plugin itself is free for use under the MIT license (which jQuery also uses.) Feel free to use it in your projects, as a gift from this startup to yours.
 
 h2. Usage
+
 Right now, you can only attach dialogs to the click event of some link somewhere &mdash; this will definitely change moving forward, but will remain the default behaviour for reverse compatibility. To use *dialog*, simply find your link element (or whatever else) that you want the dialog to pop up for. For example, let's say we have code like this that we want to spawn the dialog:
 
 @<a href="http://fallbackurl.com/" id="info-dialog">Help</a>@
