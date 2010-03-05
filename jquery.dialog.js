@@ -133,7 +133,6 @@
       generateButton(buttons);
     } else if (buttons.length) {
       for (var i=0; i < buttons.length; i++) {
-        console.log(buttons[i]);
         generateButton(buttons[i]);
       }
     }
