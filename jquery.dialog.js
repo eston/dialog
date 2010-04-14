@@ -30,44 +30,57 @@
 **/
 
 (function($) {
-
-  $.fn.dialog = function($$opts) {
-    var options = $.extend({}, $.fn.dialog.defaults, $$opts);
-    
-    $(this).click(function() {   
-      // check to see if a dialog instance has been created on the page,
-      // create if nonexistent
-      if (!$dialogContainer) {
-        establishContainer();
-      }
-      if ($dialogContainer.hasClass('displayed')) {
-        $.fn.dialog.hide(options.fadeInterval);
-      }
-      generateWindow(options.title, options.body, options.buttons);
-      $.fn.dialog.show(options.fadeInterval);
-      return false; // prevent default behaviour
-    });
+  
+  $.dialog = function($$opts) {
+    var options = $.extend({}, $.dialog.defaults, $$opts);
   };
   
-  $.fn.dialog.defaults = {
+  var options = $.dialog.defaults = {
     title: 'Dialog Title',
     body: 'test',
     buttons: {class: 'ok', caption: 'OK'},
-    fadeInterval: 600
+    fadeInterval: 200
   };
   
   var $dialogContainer = null;
+  var width, height = null;
   
-  
-  $.fn.dialog.hide = function(interval) {
+  $.dialog.hide = function(interval) {
+    if (typeof interval == 'undefined' || !interval) {
+      interval = options.fadeInterval;
+    }
+    
     if ($dialogContainer && $dialogContainer.hasClass('displayed')) {
       $dialogContainer.fadeOut(interval);
       $dialogContainer.removeClass('displayed');
     }
+    if ($.browser.msie) {
+      $('select').css('visibility', 'visible');
+    }
   };
   
-  $.fn.dialog.show = function(interval) {
+  $.dialog.show = function(data, interval) {
+    if (typeof interval == 'undefined' || !interval) {
+      interval = options.fadeInterval;
+    }
+    if ($.browser.msie) {
+      $('select').css('visibility', 'hidden');
+    }
+    if (typeof data == 'object') {
+      options = $.extend({}, $.dialog.defaults, data);
+    }
+    if (!$dialogContainer) {
+      establishContainer();
+    }
+    if ($dialogContainer.hasClass('displayed')) {
+      $.dialog.hide(interval);
+    }
+    generateWindow(options.title, options.body, options.buttons);
+    
     if ($dialogContainer) {
+      positionWindow();
+      $dialogContainer.hide(0);
+      $dialogContainer.css('visibility', 'visible');
       $dialogContainer.fadeIn(interval);
       $dialogContainer.addClass('displayed');
     }
@@ -75,7 +88,7 @@
 
   
   function attachDefaultClickEvent($button, class) {
-    $button.click($.fn.dialog.hide);
+    $button.click($.dialog.hide);
   };
   
   function attachCustomClickEvent($button, class, callback) {
@@ -86,21 +99,21 @@
   }
   
   function establishContainer() {
-    $dialogContainer = $('<div id="is-jq-dialog"></div>');
+    $dialogContainer = $('<div id="is-jq-dialog" style="visibility: hidden;"></div>');
     $('body').append($dialogContainer);
   };
 
   function generateButton(buttonObject) {
     var class, caption, callback = '';
     if (typeof(buttonObject.class) != 'undefined') {
-      class = buttonObject.class;
+      class = ' ' + buttonObject.class;
     }
     if (typeof(buttonObject.caption) != 'undefined') {
       caption = buttonObject.caption;
     }
-
+    
     var button_html = $('<a href="javascript:void(0);"'
-                    + 'class="' + class + '">'
+                    + 'class="dialog-button' + class + '">'
                     + caption
                     + '</a>');
     $button = $(button_html);
@@ -117,7 +130,7 @@
   
   function generateWindow(title, html, buttons) {
     var html = '<div id="is-jq-dialog-inner">'
-             + '<div id="is-jq-dialog-title">' + title + '</div>'
+             + '<div id="is-jq-dialog-title"><h3>' + title + '</h3></div>'
              + '<div id="is-jq-dialog-content">' + html + '</div>'
              + '<div id="is-jq-dialog-buttons"></div>'
              + '</div>';
@@ -136,6 +149,26 @@
         generateButton(buttons[i]);
       }
     }
+  };
+  
+  function positionWindow() {
+    
+    if (!width) {
+      width = $('#is-jq-dialog-inner').width();
+    }
+    if (!height) {
+      height = $('#is-jq-dialog-inner').height();  
+    }
+    
+    var window_x = $(window).width();
+    var window_y = $(window).height();
+    var setWidth = Math.ceil((window_x / 2) - (width / 2));
+    var setHeight = Math.ceil((window_y / 2) - (height / 2));
+    console.log(width, height, window_x, window_y, setWidth, setHeight);
+    
+    // set proper heights and widths
+    $('#is-jq-dialog').css('top', setHeight + 'px');
+    $('#is-jq-dialog').css('left', setWidth + 'px');
   };
   
 })(jQuery);
